@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: fixture-planner
+  datasource:
+    url: jdbc:postgresql://localhost:5432/fixtureplanner
+    username: fixtureplanner
+    password: localdev
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  kafka:
+    bootstrap-servers: localhost:9092
+
+server:
+  port: 8080
