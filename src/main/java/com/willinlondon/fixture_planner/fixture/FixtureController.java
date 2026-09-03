@@ -24,8 +24,10 @@ public class FixtureController {
     }
 
     @PostMapping("/fixtures")
-    public ResponseEntity<Fixture> addFixture(@RequestBody Fixture fixture) {
-        fixtureRepository.save(fixture);
-        return ResponseEntity.status(HttpStatus.CREATED).body(fixture);
+    public ResponseEntity<Fixture> addFixture(@RequestBody CreateFixtureRequest request) {
+        Fixture fixture = new Fixture(request.getHomeTeam(), request.getAwayTeam(),
+                request.getCompetition(), request.getKickoff());
+        Fixture savedFixture = fixtureRepository.save(fixture);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedFixture);
     }
 }

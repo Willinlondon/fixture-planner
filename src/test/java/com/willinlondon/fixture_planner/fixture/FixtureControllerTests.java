@@ -14,8 +14,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -85,5 +84,31 @@ class FixtureControllerTests {
                 () -> assertEquals(competition, capturedFixture.getCompetition()),
                 () -> assertEquals(kickoff, capturedFixture.getKickoff())
         );
+    }
+
+    @Test
+    @DisplayName("POST fixtures ignores a client-supplied id, always saving a fresh fixture.")
+    void addFixtureIgnoresClientSuppliedId() throws Exception {
+        String maliciousRequestBody = "{"
+                + "\"id\": \"11111111-1111-1111-1111-111111111111\","
+                + "\"homeTeam\": \"Liverpool\","
+                + "\"awayTeam\": \"Chelsea\","
+                + "\"competition\": \"Premier League\","
+                + "\"kickoff\": \"2026-09-25T17:15:30\""
+                + "}";
+
+        when(fixtureRepository.save(any(Fixture.class)))
+                .thenReturn(new Fixture("Liverpool", "Chelsea", "Premier League", LocalDateTime.now()));
+
+        mockMvc.perform(post("/fixtures")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(maliciousRequestBody))
+                .andExpect(status().isCreated());
+
+        ArgumentCaptor<Fixture> fixtureCaptor = ArgumentCaptor.forClass(Fixture.class);
+        verify(fixtureRepository).save(fixtureCaptor.capture());
+        Fixture capturedFixture = fixtureCaptor.getValue();
+
+        assertNull(capturedFixture.getId());
     }
 }
